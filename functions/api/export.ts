@@ -7,7 +7,7 @@ import * as XLSX from "xlsx";
 import { withAuth } from "../_lib/http";
 import { corsHeaders } from "../_lib/http";
 import { ApiException } from "../_lib/types";
-import { getAllListItems } from "../_lib/sharepoint";
+import { getAllListItems } from "../_lib/googleData";
 import { spItemToReview } from "../_lib/fieldMapping";
 import { isConcernReview, isOverdue } from "../_lib/dashboardCalculations";
 import type { SPReviewFields } from "../_lib/types";

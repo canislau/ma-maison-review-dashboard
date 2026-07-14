@@ -18,7 +18,7 @@ import { ApiException } from "../../_lib/types";
 import type { SPReviewFields } from "../../_lib/types";
 import { detectFileType, parseUploadedFile } from "../../_lib/fileParsers";
 import { validateReviewRow } from "../../_lib/validation";
-import { getAllListItems, batchCreateListItems, uploadSourceFile } from "../../_lib/sharepoint";
+import { getAllListItems, batchCreateListItems, uploadSourceFile } from "../../_lib/googleData";
 import { spItemToReview, reviewToSpFields } from "../../_lib/fieldMapping";
 import { buildExistingKeyIndex, duplicateKey } from "../../_lib/duplicateDetection";
 import { enrichReviewBatch } from "../../_lib/azureOpenAi";
@@ -148,7 +148,7 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
     // counterpart succeeded, avoiding data loss on a partial Graph failure.
     if (body.duplicateAction === "replace") {
       const failedIndexes = new Set(batchResult.failed.map((failure) => failure.index));
-      const { deleteListItem } = await import("../../_lib/sharepoint");
+      const { deleteListItem } = await import("../../_lib/googleData");
       const oldRowIds: string[] = [];
       for (let index = 0; index < rowsToImport.length; index++) {
         if (failedIndexes.has(index)) continue;

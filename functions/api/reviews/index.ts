@@ -2,7 +2,7 @@
 
 import { withAuth } from "../../_lib/http";
 import { jsonResponse } from "../../_lib/http";
-import { getAllListItems } from "../../_lib/sharepoint";
+import { getAllListItems } from "../../_lib/googleData";
 import { spItemToReview } from "../../_lib/fieldMapping";
 import { isConcernReview, isOverdue } from "../../_lib/dashboardCalculations";
 import type { SPReviewFields } from "../../_lib/types";

@@ -2,7 +2,7 @@
 // Monthly Summary sections, filtered by outlet/month/date-range.
 
 import { withAuth, jsonResponse } from "../_lib/http";
-import { getAllListItems } from "../_lib/sharepoint";
+import { getAllListItems } from "../_lib/googleData";
 import { spItemToReview } from "../_lib/fieldMapping";
 import {
   filterReviews,

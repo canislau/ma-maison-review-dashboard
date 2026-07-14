@@ -10,7 +10,7 @@
 
 import { withAuth, jsonResponse } from "../../_lib/http";
 import { ApiException } from "../../_lib/types";
-import { listSourceFiles, uploadSourceFile } from "../../_lib/sharepoint";
+import { listSourceFiles, uploadSourceFile } from "../../_lib/googleData";
 
 export const onRequest = withAuth(async ({ request, env, user }) => {
   if (request.method === "GET") {

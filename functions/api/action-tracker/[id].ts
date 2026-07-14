@@ -2,7 +2,7 @@
 
 import { withAuth, jsonResponse, readJsonBody } from "../../_lib/http";
 import { ApiException } from "../../_lib/types";
-import { updateListItem, getListItemById } from "../../_lib/sharepoint";
+import { updateListItem, getListItemById } from "../../_lib/googleData";
 import { spItemToActionTracker, actionTrackerToSpFields } from "../../_lib/fieldMapping";
 import type { SPActionTrackerFields } from "../../_lib/types";
 import type { ActionTrackerItem } from "../../../src/types";

@@ -3,7 +3,7 @@
 
 import { withAuth, jsonResponse, readJsonBody } from "../../_lib/http";
 import { ApiException } from "../../_lib/types";
-import { getAllListItems, createListItem } from "../../_lib/sharepoint";
+import { getAllListItems, createListItem } from "../../_lib/googleData";
 import { spItemToActionTracker, actionTrackerToSpFields } from "../../_lib/fieldMapping";
 import type { SPActionTrackerFields } from "../../_lib/types";
 import type { ActionTrackerItem } from "../../../src/types";

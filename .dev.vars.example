@@ -1,0 +1,16 @@
+GOOGLE_CLIENT_ID=000000000000-example.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=your-oauth-client-secret
+GOOGLE_OAUTH_REFRESH_TOKEN=your-one-time-authorized-refresh-token
+GOOGLE_SPREADSHEET_ID=spreadsheet-id-from-the-google-sheets-url
+GOOGLE_DRIVE_FOLDER_ID=folder-id-from-the-google-drive-url
+GOOGLE_ADMIN_EMAILS=your-company-email@example.com
+GOOGLE_MANAGER_EMAILS=
+GOOGLE_ALLOWED_DOMAIN=example.com
+
+SESSION_SECRET=generate-at-least-32-random-characters
+ALLOWED_ORIGIN=http://localhost:5173
+
+AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_API_KEY=
+AZURE_OPENAI_DEPLOYMENT=
+AZURE_OPENAI_API_VERSION=2024-06-01

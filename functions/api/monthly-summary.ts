@@ -5,7 +5,7 @@
 
 import { withAuth, jsonResponse } from "../_lib/http";
 import { ApiException } from "../_lib/types";
-import { getAllListItems } from "../_lib/sharepoint";
+import { getAllListItems } from "../_lib/googleData";
 import { spItemToReview } from "../_lib/fieldMapping";
 import {
   filterReviews,

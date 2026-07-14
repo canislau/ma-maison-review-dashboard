@@ -3,7 +3,7 @@
 // DELETE /api/reviews/:id — delete a review (Administrator only)
 
 import { withAuth, jsonResponse, readJsonBody } from "../../_lib/http";
-import { getListItemById, updateListItem, deleteListItem } from "../../_lib/sharepoint";
+import { getListItemById, updateListItem, deleteListItem } from "../../_lib/googleData";
 import { spItemToReview, reviewToSpFields } from "../../_lib/fieldMapping";
 import { ApiException } from "../../_lib/types";
 import type { SPReviewFields } from "../../_lib/types";

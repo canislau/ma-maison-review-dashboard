@@ -3,7 +3,7 @@
 // once their first review is imported.
 
 import { withAuth, jsonResponse } from "../_lib/http";
-import { getAllListItems } from "../_lib/sharepoint";
+import { getAllListItems } from "../_lib/googleData";
 import { spItemToReview } from "../_lib/fieldMapping";
 import type { SPReviewFields } from "../_lib/types";
 
