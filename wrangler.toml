@@ -1,0 +1,22 @@
+name = "ma-maison-review-dashboard"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+# KV namespace used ONLY as a short-lived cache: staged import previews
+# (~30 min TTL) and Graph token caching. NEVER the system of record —
+# all permanent data lives in SharePoint. Create with:
+#   wrangler kv namespace create CACHE
+#   wrangler kv namespace create CACHE --preview
+# then paste the returned IDs below.
+[[kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"
+
+# Non-secret vars can go here; secrets (MICROSOFT_CLIENT_SECRET,
+# AZURE_OPENAI_API_KEY, SESSION_SECRET) should be set via:
+#   wrangler pages secret put MICROSOFT_CLIENT_SECRET
+# or the Cloudflare dashboard, NOT committed here.
+[vars]
+ALLOWED_ORIGIN = "https://your-pages-domain.pages.dev"
