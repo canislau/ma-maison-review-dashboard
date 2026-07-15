@@ -127,3 +127,4 @@ npm run lint
 npm run build
 ```
 Cloudflare deployment rebuild.
+Deployment trigger after project-name correction.
