@@ -1,10 +1,4 @@
-name = "ma-maison-review-dashboard-google"
+name = "ma-maison-review-dashboard"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "dist"
-
-# Non-secret vars can go here. GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_REFRESH_TOKEN,
-# AZURE_OPENAI_API_KEY, and SESSION_SECRET must be Cloudflare secrets.
-# or the Cloudflare dashboard, NOT committed here.
-[vars]
-ALLOWED_ORIGIN = "https://your-pages-domain.pages.dev"
