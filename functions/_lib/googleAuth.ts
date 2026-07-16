@@ -17,7 +17,18 @@ export async function getGoogleAccessToken(env: Env): Promise<string> {
     }),
   });
   if (!response.ok) {
-    throw new ApiException(502, "GOOGLE_AUTH_FAILED", "Google rejected the OAuth refresh credentials.", await response.text());
+    const result = await response.json().catch(() => ({})) as {
+      error?: string;
+      error_description?: string;
+    };
+    const message = result.error === "invalid_client"
+      ? "Google rejected the OAuth client ID or client secret."
+      : result.error === "invalid_grant"
+        ? "Google rejected or revoked the OAuth refresh token."
+        : "Google rejected the OAuth refresh credentials.";
+    throw new ApiException(502, "GOOGLE_AUTH_FAILED", message, {
+      providerError: result.error || "unknown",
+    });
   }
   const result = await response.json() as { access_token: string; expires_in: number };
   cachedToken = { value: result.access_token, expiresAt: Date.now() + result.expires_in * 1000 };
