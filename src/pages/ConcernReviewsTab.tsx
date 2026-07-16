@@ -3,17 +3,11 @@ import { api, ApiClientError, downloadExport } from "../lib/apiClient";
 import type { Review, ReviewListQuery } from "../types";
 import { CATEGORY_OPTIONS, SEVERITY_OPTIONS, STATUS_OPTIONS } from "../types";
 import { FilterBar, SelectFilter, SearchFilter, MonthPicker } from "../components/FilterBar";
-import { SeverityBadge, StatusBadge, StarRating, OverdueBadge } from "../components/Badges";
+import { SeverityBadge, StatusBadge, StarRating } from "../components/Badges";
 import { LoadingState, EmptyState, ErrorState } from "../components/States";
 import Pagination from "../components/Pagination";
 import ReviewDetailPanel from "../components/ReviewDetailPanel";
 import { useUserRole, canEditReviews } from "../hooks/useUserRole";
-
-function isOverdueClientSide(recommendedTimeline: string, status: string): boolean {
-  if (!recommendedTimeline || status === "Resolved" || status === "Closed") return false;
-  const d = new Date(recommendedTimeline);
-  return !isNaN(d.getTime()) && d.getTime() < Date.now();
-}
 
 export default function ConcernReviewsTab() {
   const { role } = useUserRole();
@@ -117,33 +111,28 @@ export default function ConcernReviewsTab() {
           <table>
             <thead>
               <tr>
-                <th>Reviewer</th>
-                <th>Outlet</th>
                 <th>Date</th>
+                <th>Outlet</th>
                 <th>Rating</th>
                 <th>Category</th>
                 <th>Severity</th>
                 <th>Owner</th>
-                <th>Timeline</th>
+                <th>Recovery</th>
+                <th>Action Plan</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {reviews.map((r) => (
                 <tr key={r.id} className="hover:bg-section cursor-pointer" onClick={() => setSelected(r)}>
-                  <td className="font-medium">{r.reviewer}</td>
-                  <td>{r.outlet}</td>
                   <td className="whitespace-nowrap">{new Date(r.reviewDate).toLocaleDateString()}</td>
+                  <td className="font-medium">{r.outlet}</td>
                   <td><StarRating value={r.starRating} /></td>
                   <td>{r.category}</td>
                   <td><SeverityBadge severity={r.severity} /></td>
                   <td>{r.responsiblePerson || <span className="text-ink-muted">Unassigned</span>}</td>
-                  <td className="whitespace-nowrap">
-                    <div className="flex items-center gap-1.5">
-                      {r.recommendedTimeline ? new Date(r.recommendedTimeline).toLocaleDateString() : "—"}
-                      {isOverdueClientSide(r.recommendedTimeline, r.status) && <OverdueBadge />}
-                    </div>
-                  </td>
+                  <td>{r.salesRecovery || "—"}</td>
+                  <td>{r.actionPlan || "—"}</td>
                   <td><StatusBadge status={r.status} /></td>
                 </tr>
               ))}
