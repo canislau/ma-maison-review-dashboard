@@ -79,7 +79,6 @@ GOOGLE_SPREADSHEET_ID=<ID from Sheets URL>
 GOOGLE_DRIVE_FOLDER_ID=<ID from Drive folder URL>
 GOOGLE_ADMIN_EMAILS=<same admin email>
 GOOGLE_MANAGER_EMAILS=<optional comma-separated emails>
-GOOGLE_ALLOWED_DOMAIN=<optional; leave blank for personal Gmail>
 SESSION_SECRET=<at least 32 random characters>
 ALLOWED_ORIGIN=https://PROJECT.pages.dev
 ```

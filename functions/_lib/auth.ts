@@ -34,9 +34,6 @@ export async function authenticateRequest(request: Request, env: Env): Promise<A
   if (!['accounts.google.com', 'https://accounts.google.com'].includes(info.iss)) throw new ApiException(401, "WRONG_ISSUER", "Token was not issued by Google.");
   if (info.email_verified !== "true" || Number(info.exp) * 1000 < Date.now()) throw new ApiException(401, "INVALID_TOKEN", "Google account is not verified or the session expired.");
   const email = info.email.toLowerCase();
-  if (env.GOOGLE_ALLOWED_DOMAIN && email.split("@")[1] !== env.GOOGLE_ALLOWED_DOMAIN.toLowerCase()) {
-    throw new ApiException(403, "WRONG_DOMAIN", "This Google account is not allowed to use the dashboard.");
-  }
   return { oid: info.sub, name: info.name || email, email, role: resolveRole(email, env) };
 }
 

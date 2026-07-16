@@ -13,7 +13,6 @@ export interface Env {
   GOOGLE_DRIVE_FOLDER_ID: string;
   GOOGLE_ADMIN_EMAILS: string;
   GOOGLE_MANAGER_EMAILS?: string;
-  GOOGLE_ALLOWED_DOMAIN?: string;
   SESSION_SECRET: string;
   ALLOWED_ORIGIN: string;
 

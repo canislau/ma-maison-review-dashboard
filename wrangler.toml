@@ -6,7 +6,6 @@ pages_build_output_dir = "dist"
 [vars]
 ALLOWED_ORIGIN = "https://ma-maison-review-dashboard.pages.dev"
 GOOGLE_ADMIN_EMAILS = "canislau@theclearwatergroup.com"
-GOOGLE_ALLOWED_DOMAIN = "theclearwatergroup.com"
 GOOGLE_CLIENT_ID = "875500888488-hmh8rmim8tdrjl3hq2a2tkhbnig5heqf.apps.googleusercontent.com"
 GOOGLE_DRIVE_FOLDER_ID = "0APDh3Kye569-Uk9PVA"
 GOOGLE_SPREADSHEET_ID = "1yE2BMDxK3rwlKyevnrg_wFDYhrVXFQggTddOcmW-lv0"
