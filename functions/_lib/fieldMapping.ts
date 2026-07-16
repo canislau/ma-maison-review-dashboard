@@ -14,7 +14,26 @@
 
 import type { Review, ActionTrackerItem, Category, Severity, ReviewStatus } from "../../src/types";
 import type { GraphListItem, SPReviewFields, SPActionTrackerFields } from "./types";
-import { standardiseReviewDate } from "./validation";
+function normaliseStoredReviewDate(value: unknown): string {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
+    return raw.slice(0, 10);
+  }
+
+  const parts = raw.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+  if (parts) {
+    const first = Number(parts[1]);
+    const second = Number(parts[2]);
+    const day = first > 12 ? first : second > 12 ? second : first;
+    const month = first > 12 ? second : second > 12 ? first : second;
+
+    return `${parts[3]}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  }
+
+  return raw.slice(0, 10);
+}
 
 function mapStoredStatus(value?: string): ReviewStatus {
   switch ((value || "").trim().toLowerCase()) {
@@ -44,7 +63,7 @@ export function spItemToReview(item: GraphListItem<SPReviewFields>): Review {
     reviewId: f.ReviewID || f.Title || item.id,
     outlet: f.Outlet || "",
     reviewer: f.Reviewer || "",
-    reviewDate: standardiseReviewDate(String(f.ReviewDate || "")) || "",
+    reviewDate: normaliseStoredReviewDate(f.ReviewDate),
     starRating: (Number(f.StarRating) || 5) as Review["starRating"],
     originalReview: f.OriginalReview || "",
     englishTranslation: f.EnglishTranslation || "",
