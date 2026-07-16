@@ -14,6 +14,7 @@
 
 import type { Review, ActionTrackerItem, Category, Severity, ReviewStatus } from "../../src/types";
 import type { GraphListItem, SPReviewFields, SPActionTrackerFields } from "./types";
+import { standardiseReviewDate } from "./validation";
 
 function mapStoredStatus(value?: string): ReviewStatus {
   switch ((value || "").trim().toLowerCase()) {
@@ -43,7 +44,7 @@ export function spItemToReview(item: GraphListItem<SPReviewFields>): Review {
     reviewId: f.ReviewID || f.Title || item.id,
     outlet: f.Outlet || "",
     reviewer: f.Reviewer || "",
-    reviewDate: f.ReviewDate ? f.ReviewDate.slice(0, 10) : "",
+    reviewDate: standardiseReviewDate(String(f.ReviewDate || "")) || "",
     starRating: (Number(f.StarRating) || 5) as Review["starRating"],
     originalReview: f.OriginalReview || "",
     englishTranslation: f.EnglishTranslation || "",
