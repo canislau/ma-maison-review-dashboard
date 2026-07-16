@@ -10,7 +10,6 @@ export function validateReviewRow(row: Partial<Review>): string[] {
 
   if (!row.outlet || !row.outlet.trim()) errors.push("Outlet is required.");
   if (!row.reviewer || !row.reviewer.trim()) errors.push("Reviewer is required.");
-  if (!row.originalReview || !row.originalReview.trim()) errors.push("Original Review is required.");
 
   if (!row.reviewDate || isNaN(Date.parse(row.reviewDate))) {
     errors.push("Review Date is missing or not a valid date.");
