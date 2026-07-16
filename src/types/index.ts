@@ -44,20 +44,16 @@ export type Severity = "Low" | "Medium" | "High" | "Critical";
 export const SEVERITY_OPTIONS: Severity[] = ["Low", "Medium", "High", "Critical"];
 
 export type ReviewStatus =
-  | "New"
-  | "Under Review"
-  | "Action Required"
-  | "In Progress"
-  | "Resolved"
-  | "Closed";
+  | "Done"
+  | "Working in Progress"
+  | "Action Plan Executed"
+  | "Action Plan Required";
 
 export const STATUS_OPTIONS: ReviewStatus[] = [
-  "New",
-  "Under Review",
-  "Action Required",
-  "In Progress",
-  "Resolved",
-  "Closed",
+  "Done",
+  "Working in Progress",
+  "Action Plan Executed",
+  "Action Plan Required",
 ];
 
 export type UserRole = "Viewer" | "Manager" | "Administrator";

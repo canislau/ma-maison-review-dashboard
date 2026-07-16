@@ -130,7 +130,7 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
         severity: row.severity || enrichment?.severity || "Low",
         possibleRootCause: row.possibleRootCause || enrichment?.possibleRootCause || "",
         draftReply: row.draftReply || enrichment?.draftReply || "",
-        status: row.status || "New",
+        status: row.status || "Action Plan Required",
         managementReply: row.managementReply || "",
         responsiblePerson: row.responsiblePerson || "",
         salesRecovery: row.salesRecovery || "",

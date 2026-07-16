@@ -40,7 +40,7 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
     }
 
     const actionId = body.actionId || `ACT-${Date.now()}`;
-    const fields = actionTrackerToSpFields({ ...body, actionId, status: body.status || "New" });
+    const fields = actionTrackerToSpFields({ ...body, actionId, status: body.status || "Action Plan Required" });
 
     const created = await createListItem<SPActionTrackerFields>(env, "ActionTracker", fields);
     return jsonResponse(spItemToActionTracker(created), env, { status: 201 });

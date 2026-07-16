@@ -12,12 +12,10 @@ export function SeverityBadge({ severity }: { severity: Severity }) {
 
 export function StatusBadge({ status }: { status: ReviewStatus }) {
   const styles: Record<ReviewStatus, string> = {
-    New: "bg-section text-ink-muted border border-border",
-    "Under Review": "bg-accent-50 text-accent-700",
-    "Action Required": "bg-warn-100 text-warn-500",
-    "In Progress": "bg-accent-100 text-accent-700",
-    Resolved: "bg-accent-500/10 text-accent-600",
-    Closed: "bg-section text-ink-muted border border-border",
+    Done: "bg-accent-500/10 text-accent-600",
+    "Working in Progress": "bg-accent-100 text-accent-700",
+    "Action Plan Executed": "bg-accent-50 text-accent-700",
+    "Action Plan Required": "bg-warn-100 text-warn-500",
   };
   return <span className={`badge ${styles[status]}`}>{status}</span>;
 }

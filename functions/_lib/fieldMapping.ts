@@ -15,6 +15,27 @@
 import type { Review, ActionTrackerItem, Category, Severity, ReviewStatus } from "../../src/types";
 import type { GraphListItem, SPReviewFields, SPActionTrackerFields } from "./types";
 
+function mapStoredStatus(value?: string): ReviewStatus {
+  switch ((value || "").trim().toLowerCase()) {
+    case "done":
+    case "resolved":
+    case "closed":
+      return "Done";
+    case "working in progress":
+    case "in progress":
+    case "under review":
+      return "Working in Progress";
+    case "action plan executed":
+    case "action plan excueted":
+      return "Action Plan Executed";
+    case "action plan required":
+    case "action required":
+    case "new":
+    default:
+      return "Action Plan Required";
+  }
+}
+
 export function spItemToReview(item: GraphListItem<SPReviewFields>): Review {
   const f = item.fields;
   return {
@@ -35,7 +56,7 @@ export function spItemToReview(item: GraphListItem<SPReviewFields>): Review {
     salesRecovery: f.SalesRecovery || "",
     actionPlan: f.ActionPlan || "",
     recommendedTimeline: f.RecommendedTimeline || "",
-    status: (f.Status as ReviewStatus) || "New",
+    status: mapStoredStatus(f.Status),
     language: f.Language || "",
     sourceFile: f.SourceFile || "",
     sourceFileUrl: f.SourceFileURL || undefined,
@@ -82,7 +103,7 @@ export function spItemToActionTracker(item: GraphListItem<SPActionTrackerFields>
     responsiblePerson: f.ResponsiblePerson || "",
     actionPlan: f.ActionPlan || "",
     recommendedTimeline: f.RecommendedTimeline || "",
-    status: (f.Status as ReviewStatus) || "New",
+    status: mapStoredStatus(f.Status),
     completionDate: f.CompletionDate || undefined,
     remarks: f.Remarks || "",
   };

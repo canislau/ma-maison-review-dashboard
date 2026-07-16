@@ -41,13 +41,13 @@ export function isConcernReview(r: Review): boolean {
   // covers "4-5 star reviews containing a meaningful operational concern" per spec.
   if (r.severity === "High" || r.severity === "Critical") return true;
   // Reviews explicitly requiring management action, even without high severity yet assigned.
-  if (r.status === "Action Required") return true;
+  if (r.status === "Action Plan Required") return true;
   return false;
 }
 
 export function isOverdue(recommendedTimeline: string, status: string): boolean {
   if (!recommendedTimeline) return false;
-  if (status === "Resolved" || status === "Closed") return false;
+  if (status === "Done") return false;
   const d = new Date(recommendedTimeline);
   if (isNaN(d.getTime())) return false;
   return d.getTime() < Date.now();
@@ -153,8 +153,8 @@ export function computeComplaintAnalysis(reviews: Review[], allReviewsForOutletC
 // ----------------------------------------------------------------------------
 
 export function computeActionProgress(reviews: Review[]): ManagementActionProgressSummary {
-  let newCases = 0,
-    actionRequired = 0,
+  const newCases = 0;
+  let actionRequired = 0,
     inProgress = 0,
     resolved = 0,
     closed = 0,
@@ -166,28 +166,25 @@ export function computeActionProgress(reviews: Review[]): ManagementActionProgre
 
   for (const r of reviews) {
     switch (r.status) {
-      case "New":
-        newCases++;
-        break;
-      case "Action Required":
+      case "Action Plan Required":
         actionRequired++;
         break;
-      case "In Progress":
+      case "Working in Progress":
         inProgress++;
         break;
-      case "Resolved":
+      case "Action Plan Executed":
         resolved++;
         break;
-      case "Closed":
+      case "Done":
         closed++;
         break;
     }
 
     if (isOverdue(r.recommendedTimeline, r.status)) overdue++;
-    if (!r.responsiblePerson?.trim() && (r.status === "Action Required" || r.status === "In Progress")) noResponsible++;
-    if (!r.actionPlan?.trim() && (r.status === "Action Required" || r.status === "In Progress")) noActionPlan++;
+    if (!r.responsiblePerson?.trim() && (r.status === "Action Plan Required" || r.status === "Working in Progress")) noResponsible++;
+    if (!r.actionPlan?.trim() && (r.status === "Action Plan Required" || r.status === "Working in Progress")) noActionPlan++;
 
-    if ((r.status === "Resolved" || r.status === "Closed") && r.reviewDate && r.modifiedAt) {
+    if (r.status === "Done" && r.reviewDate && r.modifiedAt) {
       const start = new Date(r.reviewDate).getTime();
       const end = new Date(r.modifiedAt).getTime();
       if (!isNaN(start) && !isNaN(end) && end >= start) {

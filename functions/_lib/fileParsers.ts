@@ -70,9 +70,18 @@ function standardiseStatus(raw: string): Review["status"] | string {
     .replace(/[\u2012-\u2015]/g, "-")
     .replace(/\s+/g, " ");
 
-  if (normalised === "not replied - requires action" || normalised === "not replied - require action") {
-    return "Action Required";
+  if (
+    normalised === "not replied - requires action" ||
+    normalised === "not replied - require action" ||
+    normalised === "new" ||
+    normalised === "action required" ||
+    normalised === "action plan required"
+  ) return "Action Plan Required";
+  if (normalised === "under review" || normalised === "in progress" || normalised === "working in progress") {
+    return "Working in Progress";
   }
+  if (normalised === "action plan executed" || normalised === "action plan excueted") return "Action Plan Executed";
+  if (normalised === "resolved" || normalised === "closed" || normalised === "done") return "Done";
 
   return trimmed;
 }

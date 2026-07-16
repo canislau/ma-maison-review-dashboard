@@ -257,11 +257,10 @@ function MonthlySummarySections({
       <div className="card">
         <h3 className="text-sm font-semibold text-ink mb-3">Monthly Summary — Management Action Progress</h3>
         <dl className="text-sm space-y-1.5">
-          <Row label="New" value={actionProgress.newCases} />
-          <Row label="Action Required" value={actionProgress.actionRequiredCases} />
-          <Row label="In Progress" value={actionProgress.inProgressCases} />
-          <Row label="Resolved" value={actionProgress.resolvedCases} />
-          <Row label="Closed" value={actionProgress.closedCases} />
+          <Row label="Action Plan Required" value={actionProgress.actionRequiredCases + actionProgress.newCases} />
+          <Row label="Working in Progress" value={actionProgress.inProgressCases} />
+          <Row label="Action Plan Executed" value={actionProgress.resolvedCases} />
+          <Row label="Done" value={actionProgress.closedCases} />
           <Row label="Overdue" value={actionProgress.overdueActions} highlight={actionProgress.overdueActions > 0} />
           <Row label="Missing Owner" value={actionProgress.casesWithoutResponsiblePerson} />
           <Row label="Missing Action Plan" value={actionProgress.casesWithoutActionPlan} />
