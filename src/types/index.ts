@@ -64,7 +64,7 @@ export interface Review {
   reviewId: string; // Review ID (business key, e.g. MM003-2026-07-0001)
   outlet: string;
   reviewer: string;
-  reviewDate: string; // ISO 8601 date
+  reviewDate: string; // YYYY-MM-DD
   starRating: 1 | 2 | 3 | 4 | 5;
   originalReview: string;
   englishTranslation: string;

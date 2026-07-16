@@ -43,7 +43,7 @@ export function spItemToReview(item: GraphListItem<SPReviewFields>): Review {
     reviewId: f.ReviewID || f.Title || item.id,
     outlet: f.Outlet || "",
     reviewer: f.Reviewer || "",
-    reviewDate: f.ReviewDate || "",
+    reviewDate: f.ReviewDate ? f.ReviewDate.slice(0, 10) : "",
     starRating: (Number(f.StarRating) || 5) as Review["starRating"],
     originalReview: f.OriginalReview || "",
     englishTranslation: f.EnglishTranslation || "",
@@ -73,7 +73,7 @@ export function reviewToSpFields(review: Partial<Review>): Partial<SPReviewField
   }
   if (review.outlet !== undefined) f.Outlet = review.outlet;
   if (review.reviewer !== undefined) f.Reviewer = review.reviewer;
-  if (review.reviewDate !== undefined) f.ReviewDate = review.reviewDate;
+  if (review.reviewDate !== undefined) f.ReviewDate = review.reviewDate.slice(0, 10);
   if (review.starRating !== undefined) f.StarRating = review.starRating;
   if (review.originalReview !== undefined) f.OriginalReview = review.originalReview;
   if (review.englishTranslation !== undefined) f.EnglishTranslation = review.englishTranslation;

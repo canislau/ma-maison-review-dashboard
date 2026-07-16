@@ -63,7 +63,7 @@ export function standardiseReviewDate(raw: string): string | null {
   // Already ISO-like
   if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
     const d = new Date(trimmed);
-    return isNaN(d.getTime()) ? null : d.toISOString();
+    return isNaN(d.getTime()) ? null : trimmed.slice(0, 10);
   }
 
   // DD/MM/YYYY or MM/DD/YYYY — assume DD/MM/YYYY (Malaysia convention) when
@@ -76,9 +76,9 @@ export function standardiseReviewDate(raw: string): string | null {
     const day = first > 12 ? first : second > 12 ? second : first; // default DD/MM/YYYY
     const month = first > 12 ? second : second > 12 ? first : second;
     const d = new Date(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
-    return isNaN(d.getTime()) ? null : d.toISOString();
+    return isNaN(d.getTime()) ? null : `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   }
 
   const generic = new Date(trimmed);
-  return isNaN(generic.getTime()) ? null : generic.toISOString();
+  return isNaN(generic.getTime()) ? null : generic.toISOString().slice(0, 10);
 }
