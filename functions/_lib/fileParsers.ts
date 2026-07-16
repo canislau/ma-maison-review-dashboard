@@ -63,6 +63,20 @@ function normaliseHeader(h: string): string {
   return h.trim().toLowerCase().replace(/_/g, " ").replace(/\s+/g, " ");
 }
 
+function standardiseStatus(raw: string): Review["status"] | string {
+  const trimmed = raw.trim();
+  const normalised = trimmed
+    .toLowerCase()
+    .replace(/[\u2012-\u2015]/g, "-")
+    .replace(/\s+/g, " ");
+
+  if (normalised === "not replied - requires action" || normalised === "not replied - require action") {
+    return "Action Required";
+  }
+
+  return trimmed;
+}
+
 function mapRowToReview(rawRow: Record<string, unknown>, outletHint?: string): Partial<Review> {
   const row: Partial<Review> = {};
 
@@ -85,6 +99,11 @@ function mapRowToReview(rawRow: Record<string, unknown>, outletHint?: string): P
 
     if (key === "outlet") {
       row.outlet = standardiseOutletName(String(value));
+      continue;
+    }
+
+    if (key === "status") {
+      row.status = standardiseStatus(String(value)) as Review["status"];
       continue;
     }
 
