@@ -127,3 +127,27 @@ npm run build
 ```
 Cloudflare deployment rebuild.
 Deployment trigger after project-name correction.
+# Microsoft Entra sign-in
+
+The dashboard supports Google and Microsoft work-account sign-in. Create a Microsoft Entra app registration with these settings:
+
+1. **Microsoft Entra admin center → App registrations → New registration**.
+2. Name: `Ma Maison Review Dashboard`.
+3. Supported account type: **Accounts in this organizational directory only**.
+4. Under **Authentication → Add a platform → Single-page application**, add:
+   `https://ma-maison-review-dashboard.pages.dev`
+5. Under **API permissions**, add delegated Microsoft Graph permission `User.Read` and grant consent if your tenant requires it.
+6. Copy the **Directory (tenant) ID** and **Application (client) ID** into the Cloudflare variables listed below.
+
+No Microsoft client secret is required. Browser sign-in uses Authorization Code with PKCE through MSAL.
+
+```text
+MICROSOFT_TENANT_ID=<Directory tenant ID>
+MICROSOFT_CLIENT_ID=<Application client ID>
+VITE_MICROSOFT_TENANT_ID=<same Directory tenant ID>
+VITE_MICROSOFT_CLIENT_ID=<same Application client ID>
+MICROSOFT_ADMIN_EMAILS=<optional comma-separated admin emails>
+MICROSOFT_MANAGER_EMAILS=<optional comma-separated manager emails>
+VITE_MICROSOFT_ADMIN_EMAILS=<same admin emails>
+VITE_MICROSOFT_MANAGER_EMAILS=<same manager emails>
+```

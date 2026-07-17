@@ -1,5 +1,5 @@
 // ============================================================================
-// Typed API client. Every call attaches the current Google ID token.
+// Typed API client. Every call attaches the current Google or Microsoft token.
 // ============================================================================
 
 import { getStoredGoogleToken } from "./googleAuth";
@@ -28,7 +28,7 @@ export class ApiClientError extends Error {
 
 async function getAccessToken(): Promise<string> {
   const token = getStoredGoogleToken();
-  if (!token) throw new ApiClientError(401, "NOT_SIGNED_IN", "Please sign in with Google to continue.");
+  if (!token) throw new ApiClientError(401, "NOT_SIGNED_IN", "Please sign in to continue.");
   return token;
 }
 

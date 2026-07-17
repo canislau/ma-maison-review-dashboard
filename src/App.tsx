@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GoogleSignInButton, useGoogleAuth } from "./lib/googleAuth";
+import { GoogleSignInButton, MicrosoftSignInButton, useGoogleAuth } from "./lib/googleAuth";
 import { useUserRole } from "./hooks/useUserRole";
 import OverviewTab from "./pages/OverviewTab";
 import ConcernReviewsTab from "./pages/ConcernReviewsTab";
@@ -9,7 +9,7 @@ type TabKey = "overview" | "concern" | "all";
 const TABS: { key: TabKey; label: string }[] = [{ key: "overview", label: "Overview" }, { key: "concern", label: "Concern Reviews" }, { key: "all", label: "All Reviews" }];
 
 function SignInScreen() {
-  return <div className="min-h-screen flex items-center justify-center bg-section"><div className="card max-w-sm w-full text-center"><div className="w-12 h-12 rounded-full bg-accent-100 mx-auto mb-4 flex items-center justify-center text-accent-700 font-semibold">MM</div><h1 className="text-lg font-semibold text-ink mb-1">Ma Maison Review Dashboard</h1><p className="text-sm text-ink-muted mb-6">Sign in with your authorised Google account.</p><GoogleSignInButton /></div></div>;
+  return <div className="min-h-screen flex items-center justify-center bg-section"><div className="card max-w-sm w-full text-center"><div className="w-12 h-12 rounded-full bg-accent-100 mx-auto mb-4 flex items-center justify-center text-accent-700 font-semibold">MM</div><h1 className="text-lg font-semibold text-ink mb-1">Ma Maison Review Dashboard</h1><p className="text-sm text-ink-muted mb-6">Sign in with your authorised work account.</p><div className="space-y-3"><GoogleSignInButton /><div className="flex items-center gap-3 text-xs text-ink-muted"><span className="h-px bg-border flex-1"/><span>or</span><span className="h-px bg-border flex-1"/></div><MicrosoftSignInButton /></div></div></div>;
 }
 
 function AppShell() {

@@ -22,7 +22,7 @@ function normaliseStoredReviewDate(value: unknown): string {
     return raw.slice(0, 10);
   }
 
-  const parts = raw.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+  const parts = raw.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
   if (parts) {
     const first = Number(parts[1]);
     const second = Number(parts[2]);
