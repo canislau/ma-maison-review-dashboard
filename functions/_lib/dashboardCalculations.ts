@@ -23,11 +23,14 @@ export function monthKeyFromDate(iso: string): string {
 }
 
 export function filterReviews(reviews: Review[], filters: DashboardFilters): Review[] {
+  const from = filters.dateFrom ? new Date(`${filters.dateFrom}T00:00:00`) : null;
+  const to = filters.dateTo ? new Date(`${filters.dateTo}T23:59:59.999`) : null;
+
   return reviews.filter((r) => {
     if (filters.outlet && filters.outlet !== "All" && r.outlet !== filters.outlet) return false;
     if (filters.month && monthKeyFromDate(r.reviewDate) !== filters.month) return false;
-    if (filters.dateFrom && new Date(r.reviewDate) < new Date(filters.dateFrom)) return false;
-    if (filters.dateTo && new Date(r.reviewDate) > new Date(filters.dateTo)) return false;
+    if (from && new Date(r.reviewDate) < from) return false;
+    if (to && new Date(r.reviewDate) > to) return false;
     return true;
   });
 }

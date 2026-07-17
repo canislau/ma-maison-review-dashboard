@@ -14,7 +14,7 @@ import { Line, Bar, Doughnut } from "react-chartjs-2";
 import { api, ApiClientError } from "../lib/apiClient";
 import type { DashboardData } from "../types";
 import KpiCard from "../components/KpiCard";
-import { FilterBar, SelectFilter, MonthPicker } from "../components/FilterBar";
+import { FilterBar, SelectFilter } from "../components/FilterBar";
 import { LoadingState, ErrorState } from "../components/States";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend);
@@ -23,9 +23,38 @@ const CHART_GREEN = "#3f6b4c";
 const CHART_GREEN_LIGHT = "#8fae97";
 const CHART_RED = "#c0392b";
 
+type DateRangePreset = "today" | "yesterday" | "this-month" | "last-7-days" | "last-30-days" | "custom";
+
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getPresetRange(preset: Exclude<DateRangePreset, "custom">): { from: string; to: string } {
+  const today = new Date();
+  const from = new Date(today);
+
+  if (preset === "yesterday") {
+    from.setDate(from.getDate() - 1);
+    return { from: formatLocalDate(from), to: formatLocalDate(from) };
+  }
+  if (preset === "this-month") {
+    from.setDate(1);
+  } else if (preset === "last-7-days") {
+    from.setDate(from.getDate() - 6);
+  } else if (preset === "last-30-days") {
+    from.setDate(from.getDate() - 29);
+  }
+
+  return { from: formatLocalDate(from), to: formatLocalDate(today) };
+}
+
 export default function OverviewTab() {
   const [outlet, setOutlet] = useState("All");
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [datePreset, setDatePreset] = useState<DateRangePreset>("this-month");
+  const [dateRange, setDateRange] = useState(() => getPresetRange("this-month"));
   const [outlets, setOutlets] = useState<string[]>([]);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +65,7 @@ export default function OverviewTab() {
     setError(null);
     try {
       const [dashboard, outletsRes] = await Promise.all([
-        api.dashboard.get({ outlet, month }),
+        api.dashboard.get({ outlet, dateFrom: dateRange.from, dateTo: dateRange.to }),
         api.outlets.list(),
       ]);
       setData(dashboard);
@@ -46,7 +75,22 @@ export default function OverviewTab() {
     } finally {
       setLoading(false);
     }
-  }, [outlet, month]);
+  }, [outlet, dateRange.from, dateRange.to]);
+
+  const selectDatePreset = (preset: DateRangePreset) => {
+    setDatePreset(preset);
+    if (preset !== "custom") setDateRange(getPresetRange(preset));
+  };
+
+  const changeDateFrom = (from: string) => {
+    setDatePreset("custom");
+    setDateRange((current) => ({ from, to: current.to && from > current.to ? from : current.to }));
+  };
+
+  const changeDateTo = (to: string) => {
+    setDatePreset("custom");
+    setDateRange((current) => ({ from: current.from && to < current.from ? to : current.from, to }));
+  };
 
   useEffect(() => {
     load();
@@ -67,7 +111,39 @@ export default function OverviewTab() {
           onChange={(v) => setOutlet(v || "All")}
           options={outlets.map((o) => ({ value: o, label: o }))}
         />
-        <MonthPicker value={month} onChange={setMonth} />
+        <select
+          aria-label="Date range"
+          className="input w-auto min-w-[10rem]"
+          value={datePreset}
+          onChange={(event) => selectDatePreset(event.target.value as DateRangePreset)}
+        >
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="this-month">This month</option>
+          <option value="last-7-days">Last 7 days</option>
+          <option value="last-30-days">Last 30 days</option>
+          <option value="custom">Custom range</option>
+        </select>
+        <label className="flex items-center gap-2 text-sm text-ink-muted">
+          <span>From</span>
+          <input
+            type="date"
+            aria-label="Start date"
+            className="input w-auto"
+            value={dateRange.from}
+            onChange={(event) => changeDateFrom(event.target.value)}
+          />
+        </label>
+        <label className="flex items-center gap-2 text-sm text-ink-muted">
+          <span>To</span>
+          <input
+            type="date"
+            aria-label="End date"
+            className="input w-auto"
+            value={dateRange.to}
+            onChange={(event) => changeDateTo(event.target.value)}
+          />
+        </label>
       </FilterBar>
 
       {/* KPI cards */}

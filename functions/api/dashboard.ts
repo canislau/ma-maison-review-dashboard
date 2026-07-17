@@ -40,9 +40,16 @@ export const onRequest = withAuth(async ({ request, env }) => {
   const data: DashboardData = {
     filters,
     performance: computeReviewPerformance(filtered),
-    complaints: computeComplaintAnalysis(filtered, filterReviews(allReviews, { month: filters.month })),
+    complaints: computeComplaintAnalysis(
+      filtered,
+      filterReviews(allReviews, {
+        month: filters.month,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+      }),
+    ),
     actionProgress: computeActionProgress(filtered),
-    ...computeTrends(allReviews, 12),
+    ...computeTrends(filtered, 12),
     outlets,
   };
 
