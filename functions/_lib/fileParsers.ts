@@ -8,7 +8,7 @@
 
 import * as XLSX from "xlsx";
 import type { Review } from "../../src/types";
-import { standardiseOutletName, standardiseReviewDate } from "./validation";
+import { standardiseReviewDate } from "./validation";
 import { resolveOutletIdentity } from "../../src/data/outletDirectory";
 
 // Maps flexible/lowercased header variants to our canonical Review keys.
@@ -112,7 +112,10 @@ function mapRowToReview(rawRow: Record<string, unknown>, outletHint?: string): P
     }
 
     if (key === "outlet") {
-      row.outlet = standardiseOutletName(String(value));
+      // Preserve the source text until the final identity pass. Branded
+      // values such as "Kintsugi - The Gardens Mall" must not be reduced to
+      // the shared location name before the brand is resolved.
+      row.outlet = String(value).trim();
       continue;
     }
 
@@ -125,7 +128,7 @@ function mapRowToReview(rawRow: Record<string, unknown>, outletHint?: string): P
   }
 
   if (!row.outlet && outletHint) {
-    row.outlet = standardiseOutletName(outletHint);
+    row.outlet = outletHint.trim();
   }
   const identity = resolveOutletIdentity(row);
   row.brand = identity.brand;
