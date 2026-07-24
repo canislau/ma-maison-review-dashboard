@@ -42,6 +42,13 @@ export function resolveOutletIdentity(input: {
   const brand = normalise(input.brand || "");
   const outlet = normalise(input.outlet || "");
 
+  // This brand appears in historical CWX workbooks but no outlet code has
+  // been supplied in the managed directory. Preserve the known brand/outlet
+  // and leave the code blank rather than inventing one.
+  if (outlet.includes("way modern chinois") && outlet.includes("1 utama")) {
+    return { brand: "Way Modern Chinois", outletCode: "", outlet: "One Utama" };
+  }
+
   let match = OUTLET_DIRECTORY.find((entry) => entry.code === code);
   if (!match && reviewCode) match = OUTLET_DIRECTORY.find((entry) => entry.code === reviewCode);
   if (!match && outlet) {

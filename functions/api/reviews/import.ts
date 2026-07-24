@@ -210,12 +210,17 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
   let parsedRows: Partial<Review>[];
   try {
     parsedRows = parseUploadedFile(fileType, file.name, buffer, outletHint);
+    const parsedIdentities = new Set(
+      parsedRows.map((row) => `${row.brand || ""}|${row.outletCode || ""}|${row.outlet || ""}`)
+    );
+    const isMixedOutletFile = parsedIdentities.size > 1;
     parsedRows = parsedRows.map((row) => ({ ...row, ...resolveOutletIdentity({
       // The outlet selected in the upload form is an explicit management
       // choice and must win over an ambiguous name inferred from the file
-      // (for example, both MM012 and RT001 are "Sunway Velocity").
-      brand: brandHint || row.brand,
-      outletCode: outletCodeHint || row.outletCode,
+      // for a single-outlet file. Mixed-outlet workbooks retain each row's
+      // own identity instead.
+      brand: isMixedOutletFile ? row.brand : brandHint || row.brand,
+      outletCode: isMixedOutletFile ? row.outletCode : outletCodeHint || row.outletCode,
       outlet: row.outlet || outletHint,
       reviewId: row.reviewId,
     }) }));
@@ -244,7 +249,11 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
     };
   });
 
-  const stagedIdentity = resolveOutletIdentity({ brand: brandHint, outletCode: outletCodeHint, outlet: outletHint });
+  const stagedBrands = new Set(parsedRows.map((row) => row.brand).filter(Boolean));
+  const stagedOutlets = new Set(parsedRows.map((row) => row.outlet).filter(Boolean));
+  const stagedIdentity = stagedBrands.size > 1 || stagedOutlets.size > 1
+    ? { brand: "Multiple Brands", outletCode: "", outlet: "Multiple Outlets" }
+    : resolveOutletIdentity({ brand: brandHint, outletCode: outletCodeHint, outlet: outletHint });
   const staged: StagedImport = {
     fileName: file.name,
     fileType,
