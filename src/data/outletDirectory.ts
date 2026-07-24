@@ -31,6 +31,12 @@ function normalise(value: string): string {
   return value.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+const SHARED_OUTLET_NAMES = new Set(["the gardens mall", "the gardens", "sunway velocity", "sunway velocity mall"]);
+
+export function isSharedOutletName(value: string): boolean {
+  return SHARED_OUTLET_NAMES.has(normalise(value));
+}
+
 export function resolveOutletIdentity(input: {
   outlet?: string;
   brand?: string;
@@ -47,6 +53,10 @@ export function resolveOutletIdentity(input: {
   // and leave the code blank rather than inventing one.
   if (outlet.includes("way modern chinois") && outlet.includes("1 utama")) {
     return { brand: "Way Modern Chinois", outletCode: "", outlet: "One Utama" };
+  }
+
+  if (!brand && !code && !reviewCode && isSharedOutletName(outlet)) {
+    return { brand: "Unmapped", outletCode: "", outlet: input.outlet?.trim() || "" };
   }
 
   let match = OUTLET_DIRECTORY.find((entry) => entry.code === code);

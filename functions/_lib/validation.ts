@@ -10,6 +10,9 @@ export function validateReviewRow(row: Partial<Review>): string[] {
   const errors: string[] = [];
 
   if (!row.outlet || !row.outlet.trim()) errors.push("Outlet is required.");
+  if (row.brand === "Unmapped") {
+    errors.push("Outlet needs a Brand or Outlet Code because this location is shared by multiple brands.");
+  }
   if (!row.reviewer || !row.reviewer.trim()) errors.push("Reviewer is required.");
 
   if (!row.reviewDate || isNaN(Date.parse(row.reviewDate))) {
