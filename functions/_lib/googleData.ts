@@ -16,6 +16,10 @@ function rangeUrl(env: Env, sheet: string, suffix = ""): string {
   return `${SHEETS_BASE}/${env.GOOGLE_SPREADSHEET_ID}/values/${encodeURIComponent(`${sheet}!A:ZZ`)}${suffix}`;
 }
 
+function exactRangeUrl(env: Env, sheet: string, range: string, suffix = ""): string {
+  return `${SHEETS_BASE}/${env.GOOGLE_SPREADSHEET_ID}/values/${encodeURIComponent(`${sheet}!${range}`)}${suffix}`;
+}
+
 async function ensureSheet(env: Env, sheet: string): Promise<void> {
   try {
     await googleRequest(env, rangeUrl(env, sheet));
@@ -32,18 +36,20 @@ async function ensureSheet(env: Env, sheet: string): Promise<void> {
   }
   const current = await googleRequest<{ values?: string[][] }>(env, rangeUrl(env, sheet));
   if (!current.values?.length) {
-    await googleRequest(env, rangeUrl(env, sheet, "?valueInputOption=RAW"), {
+    const end = columnName(headers(sheet).length);
+    await googleRequest(env, exactRangeUrl(env, sheet, `A1:${end}1`, "?valueInputOption=RAW"), {
       method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ range: `${sheet}!A1`, majorDimension: "ROWS", values: [headers(sheet)] }),
+      body: JSON.stringify({ range: `${sheet}!A1:${end}1`, majorDimension: "ROWS", values: [headers(sheet)] }),
     });
   } else if (sheet === "Reviews") {
     const currentHeaders = current.values[0] || [];
     const oldHeaders = REVIEW_HEADERS.slice(0, -2);
     const safeToExtend = oldHeaders.every((name, index) => currentHeaders[index] === name);
     if (safeToExtend && (!currentHeaders.includes("Brand") || !currentHeaders.includes("OutletCode"))) {
-      await googleRequest(env, rangeUrl(env, sheet, "?valueInputOption=RAW"), {
+      const end = columnName(REVIEW_HEADERS.length);
+      await googleRequest(env, exactRangeUrl(env, sheet, `A1:${end}1`, "?valueInputOption=RAW"), {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ range: `${sheet}!A1`, majorDimension: "ROWS", values: [REVIEW_HEADERS] }),
+        body: JSON.stringify({ range: `${sheet}!A1:${end}1`, majorDimension: "ROWS", values: [REVIEW_HEADERS] }),
       });
     }
   }
