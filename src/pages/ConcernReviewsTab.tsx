@@ -8,12 +8,15 @@ import { LoadingState, EmptyState, ErrorState } from "../components/States";
 import Pagination from "../components/Pagination";
 import ReviewDetailPanel from "../components/ReviewDetailPanel";
 import { useUserRole, canEditReviews } from "../hooks/useUserRole";
+import type { OutletDirectoryEntry } from "../data/outletDirectory";
 
 export default function ConcernReviewsTab() {
   const { role } = useUserRole();
   const editable = canEditReviews(role);
 
   const [outlets, setOutlets] = useState<string[]>([]);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [directory, setDirectory] = useState<OutletDirectoryEntry[]>([]);
   const [responsiblePersons, setResponsiblePersons] = useState<string[]>([]);
   const [query, setQuery] = useState<ReviewListQuery>({ page: 1, pageSize: 25, concernOnly: true });
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -31,6 +34,8 @@ export default function ConcernReviewsTab() {
       setReviews(result.items);
       setTotal(result.total);
       setOutlets(outletsRes.outlets);
+      setBrands(outletsRes.brands);
+      setDirectory(outletsRes.directory);
       setResponsiblePersons(
         Array.from(new Set(result.items.map((r) => r.responsiblePerson).filter(Boolean))).sort()
       );
@@ -82,7 +87,8 @@ export default function ConcernReviewsTab() {
 
       <FilterBar>
         <SearchFilter value={query.search || ""} onChange={(v) => updateQuery({ search: v })} />
-        <SelectFilter label="All Outlets" value={query.outlet || ""} onChange={(v) => updateQuery({ outlet: v })} options={outlets.map((o) => ({ value: o, label: o }))} />
+        <SelectFilter label="All Brands" value={query.brand || ""} onChange={(v) => updateQuery({ brand: v || undefined, outlet: undefined })} options={brands.map((brand) => ({ value: brand, label: brand }))} />
+        <SelectFilter label="All Outlets" value={query.outlet || ""} onChange={(v) => updateQuery({ outlet: v || undefined })} options={(query.brand ? directory.filter((entry) => entry.brand === query.brand).map((entry) => entry.name) : outlets).map((o) => ({ value: o, label: o }))} />
         <MonthPicker value={query.month || ""} onChange={(v) => updateQuery({ month: v })} />
         <SelectFilter
           label="All Ratings"
@@ -112,6 +118,8 @@ export default function ConcernReviewsTab() {
             <thead>
               <tr>
                 <th>Date</th>
+                <th>Brand</th>
+                <th>Code</th>
                 <th>Outlet</th>
                 <th>Rating</th>
                 <th>Category</th>
@@ -126,6 +134,8 @@ export default function ConcernReviewsTab() {
               {reviews.map((r) => (
                 <tr key={r.id} className="hover:bg-section cursor-pointer" onClick={() => setSelected(r)}>
                   <td className="whitespace-nowrap">{new Date(r.reviewDate).toLocaleDateString()}</td>
+                  <td>{r.brand}</td>
+                  <td className="font-medium whitespace-nowrap">{r.outletCode || "—"}</td>
                   <td className="font-medium">{r.outlet}</td>
                   <td><StarRating value={r.starRating} /></td>
                   <td>{r.category}</td>

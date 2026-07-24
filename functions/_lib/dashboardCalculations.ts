@@ -27,6 +27,7 @@ export function filterReviews(reviews: Review[], filters: DashboardFilters): Rev
   const to = filters.dateTo ? new Date(`${filters.dateTo}T23:59:59.999`) : null;
 
   return reviews.filter((r) => {
+    if (filters.brand && filters.brand !== "All" && r.brand !== filters.brand) return false;
     if (filters.outlet && filters.outlet !== "All" && r.outlet !== filters.outlet) return false;
     if (filters.month && monthKeyFromDate(r.reviewDate) !== filters.month) return false;
     if (from && new Date(r.reviewDate) < from) return false;
@@ -124,15 +125,25 @@ export function computeComplaintAnalysis(reviews: Review[], allReviewsForOutletC
     .slice(0, 10)
     .map(([theme, count]) => ({ theme, count }));
 
+  const brandGroups = new Map<string, Review[]>();
   const outletGroups = new Map<string, Review[]>();
   for (const r of allReviewsForOutletComparison) {
-    if (!outletGroups.has(r.outlet)) outletGroups.set(r.outlet, []);
-    outletGroups.get(r.outlet)!.push(r);
+    if (!brandGroups.has(r.brand)) brandGroups.set(r.brand, []);
+    brandGroups.get(r.brand)!.push(r);
+    const outletKey = `${r.brand}\u0000${r.outletCode}\u0000${r.outlet}`;
+    if (!outletGroups.has(outletKey)) outletGroups.set(outletKey, []);
+    outletGroups.get(outletKey)!.push(r);
   }
-  const outletComparison = Array.from(outletGroups.entries()).map(([outlet, rs]) => {
+  const brandComparison = Array.from(brandGroups.entries()).map(([brand, rs]) => {
+    const perf = computeReviewPerformance(rs);
+    return { brand, totalReviews: perf.totalReviews, averageRating: perf.averageStarRating, negativePercentage: perf.negativePercentage };
+  });
+  const outletComparison = Array.from(outletGroups.values()).map((rs) => {
     const perf = computeReviewPerformance(rs);
     return {
-      outlet,
+      brand: rs[0].brand,
+      outletCode: rs[0].outletCode,
+      outlet: rs[0].outlet,
       totalReviews: perf.totalReviews,
       averageRating: perf.averageStarRating,
       negativePercentage: perf.negativePercentage,
@@ -147,6 +158,7 @@ export function computeComplaintAnalysis(reviews: Review[], allReviewsForOutletC
     highSeverityCount: highSeverity,
     criticalCount: critical,
     repeatedThemes,
+    brandComparison,
     outletComparison,
   };
 }

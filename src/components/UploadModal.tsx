@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { api, ApiClientError } from "../lib/apiClient";
 import type { ImportPreviewResult, DuplicateAction, ImportCommitResult } from "../types";
+import type { OutletDirectoryEntry } from "../data/outletDirectory";
 
 interface UploadModalProps {
-  outlets: string[];
+  directory: OutletDirectoryEntry[];
   onClose: () => void;
   onImported: () => void;
 }
 
 type Step = "select" | "preview" | "committing" | "done";
 
-export default function UploadModal({ outlets, onClose, onImported }: UploadModalProps) {
+export default function UploadModal({ directory, onClose, onImported }: UploadModalProps) {
   const [step, setStep] = useState<Step>("select");
   const [file, setFile] = useState<File | null>(null);
-  const [outlet, setOutlet] = useState(outlets[0] || "");
+  const [brand, setBrand] = useState(directory[0]?.brand || "");
+  const [outletCode, setOutletCode] = useState(directory[0]?.code || "");
+  const availableOutlets = directory.filter((entry) => entry.brand === brand);
+  const selectedOutlet = directory.find((entry) => entry.code === outletCode) || availableOutlets[0];
   const [preview, setPreview] = useState<ImportPreviewResult | null>(null);
   const [duplicateAction, setDuplicateAction] = useState<DuplicateAction>("skip");
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
@@ -26,7 +30,12 @@ export default function UploadModal({ outlets, onClose, onImported }: UploadModa
     setLoading(true);
     setError(null);
     try {
-      const res = await api.reviews.importPreview(file, outlet);
+      if (!selectedOutlet) throw new ApiClientError(400, "OUTLET_REQUIRED", "Select an outlet.");
+      const res = await api.reviews.importPreview(file, {
+        brand: selectedOutlet.brand,
+        outletCode: selectedOutlet.code,
+        outlet: selectedOutlet.name,
+      });
       setPreview(res);
       setStep("preview");
     } catch (err) {
@@ -70,10 +79,22 @@ export default function UploadModal({ outlets, onClose, onImported }: UploadModa
           {step === "select" && (
             <>
               <div>
+                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wide mb-1">Brand</label>
+                <select className="input" value={brand} onChange={(e) => {
+                  const nextBrand = e.target.value;
+                  setBrand(nextBrand);
+                  setOutletCode(directory.find((entry) => entry.brand === nextBrand)?.code || "");
+                }}>
+                  {Array.from(new Set(directory.map((entry) => entry.brand))).map((item) => (
+                    <option key={item} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label className="block text-xs font-medium text-ink-muted uppercase tracking-wide mb-1">Outlet</label>
-                <select className="input" value={outlet} onChange={(e) => setOutlet(e.target.value)}>
-                  {outlets.map((o) => (
-                    <option key={o} value={o}>{o}</option>
+                <select className="input" value={selectedOutlet?.code || ""} onChange={(e) => setOutletCode(e.target.value)}>
+                  {availableOutlets.map((entry) => (
+                    <option key={entry.code} value={entry.code}>{entry.code} — {entry.name}</option>
                   ))}
                 </select>
                 <p className="text-xs text-ink-muted mt-1">Used when the file doesn't specify an outlet per row.</p>

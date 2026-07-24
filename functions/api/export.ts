@@ -15,6 +15,8 @@ import type { Review } from "../../src/types";
 
 const EXPORT_COLUMNS: { key: keyof Review; header: string }[] = [
   { key: "reviewId", header: "Review ID" },
+  { key: "brand", header: "Brand" },
+  { key: "outletCode", header: "Outlet Code" },
   { key: "outlet", header: "Outlet" },
   { key: "reviewer", header: "Reviewer" },
   { key: "reviewDate", header: "Review Date" },
@@ -53,6 +55,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
   const items = await getAllListItems<SPReviewFields>(env, "Reviews");
   let reviews: Review[] = items.map(spItemToReview);
 
+  const brand = q.get("brand");
   const outlet = q.get("outlet");
   const month = q.get("month");
   const rating = q.get("rating");
@@ -62,6 +65,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
   const concernOnly = q.get("concernOnly") === "true";
   const overdueOnly = q.get("overdueOnly") === "true";
 
+  if (brand && brand !== "All") reviews = reviews.filter((r) => r.brand === brand);
   if (outlet && outlet !== "All") reviews = reviews.filter((r) => r.outlet === outlet);
   if (month) reviews = reviews.filter((r) => r.reviewDate?.slice(0, 7) === month);
   if (rating) reviews = reviews.filter((r) => r.starRating === parseInt(rating, 10));
@@ -83,7 +87,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
     return new Response(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="ma-maison-reviews-${timestamp}.csv"`,
+        "Content-Disposition": `attachment; filename="cwx-reviews-${timestamp}.csv"`,
         ...corsHeaders(env),
       },
     });
@@ -102,7 +106,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
   return new Response(buffer, {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename="ma-maison-reviews-${timestamp}.xlsx"`,
+      "Content-Disposition": `attachment; filename="cwx-reviews-${timestamp}.xlsx"`,
       ...corsHeaders(env),
     },
   });

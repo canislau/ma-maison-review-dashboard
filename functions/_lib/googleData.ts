@@ -5,7 +5,7 @@ import { ApiException } from "./types";
 import { googleRequest, getGoogleAccessToken } from "./googleAuth";
 
 const SHEETS_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
-const REVIEW_HEADERS = ["Title","ReviewID","Outlet","Reviewer","ReviewDate","StarRating","OriginalReview","EnglishTranslation","ManagementReply","DraftReply","Category","Severity","PossibleRootCause","ResponsiblePerson","SalesRecovery","ActionPlan","RecommendedTimeline","Status","Language","SourceFile","SourceFileURL","Created","Modified"];
+const REVIEW_HEADERS = ["Title","ReviewID","Outlet","Reviewer","ReviewDate","StarRating","OriginalReview","EnglishTranslation","ManagementReply","DraftReply","Category","Severity","PossibleRootCause","ResponsiblePerson","SalesRecovery","ActionPlan","RecommendedTimeline","Status","Language","SourceFile","SourceFileURL","Created","Modified","Brand","OutletCode"];
 const ACTION_HEADERS = ["Title","ActionID","ReviewID","Outlet","ResponsiblePerson","ActionPlan","RecommendedTimeline","Status","CompletionDate","Remarks","Created","Modified"];
 
 function headers(sheet: string): string[] {
@@ -36,6 +36,16 @@ async function ensureSheet(env: Env, sheet: string): Promise<void> {
       method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ range: `${sheet}!A1`, majorDimension: "ROWS", values: [headers(sheet)] }),
     });
+  } else if (sheet === "Reviews") {
+    const currentHeaders = current.values[0] || [];
+    const oldHeaders = REVIEW_HEADERS.slice(0, -2);
+    const safeToExtend = oldHeaders.every((name, index) => currentHeaders[index] === name);
+    if (safeToExtend && (!currentHeaders.includes("Brand") || !currentHeaders.includes("OutletCode"))) {
+      await googleRequest(env, rangeUrl(env, sheet, "?valueInputOption=RAW"), {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ range: `${sheet}!A1`, majorDimension: "ROWS", values: [REVIEW_HEADERS] }),
+      });
+    }
   }
 }
 
@@ -81,11 +91,17 @@ export async function updateListItem<TFields>(env: Env, sheet: string, itemId: s
   const existing = data.values?.[rowNumber - 1];
   if (!existing) throw new ApiException(404, "ROW_NOT_FOUND", "The requested spreadsheet row no longer exists.");
   const stamped = { ...(fields as Record<string, unknown>), Modified: new Date().toISOString() };
-  const end = String.fromCharCode(64 + headers(sheet).length);
+  const end = columnName(headers(sheet).length);
   await googleRequest(env, `${SHEETS_BASE}/${env.GOOGLE_SPREADSHEET_ID}/values/${encodeURIComponent(`${sheet}!A${rowNumber}:${end}${rowNumber}`)}?valueInputOption=RAW`, {
     method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ values: [rowFromFields(sheet, stamped, existing)] }),
   });
   return fields as TFields;
+}
+
+function columnName(column: number): string {
+  let result = "";
+  for (let n = column; n > 0; n = Math.floor((n - 1) / 26)) result = String.fromCharCode(65 + ((n - 1) % 26)) + result;
+  return result;
 }
 
 async function sheetNumericId(env: Env, sheet: string): Promise<number> {

@@ -20,6 +20,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
   const q = url.searchParams;
 
   const filters: DashboardFilters = {
+    brand: q.get("brand") || "All",
     outlet: q.get("outlet") || "All",
     month: q.get("month") || undefined,
     dateFrom: q.get("dateFrom") || undefined,
@@ -35,6 +36,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
   const allReviews: Review[] = items.map(spItemToReview);
 
   const filtered = filterReviews(allReviews, filters);
+  const brands = Array.from(new Set(allReviews.map((r) => r.brand))).filter(Boolean).sort();
   const outlets = Array.from(new Set(allReviews.map((r) => r.outlet))).filter(Boolean).sort();
 
   const data: DashboardData = {
@@ -43,6 +45,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
     complaints: computeComplaintAnalysis(
       filtered,
       filterReviews(allReviews, {
+        brand: filters.brand,
         month: filters.month,
         dateFrom: filters.dateFrom,
         dateTo: filters.dateTo,
@@ -50,6 +53,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
     ),
     actionProgress: computeActionProgress(filtered),
     ...computeTrends(filtered, 12),
+    brands,
     outlets,
   };
 

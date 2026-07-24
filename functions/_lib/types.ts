@@ -62,6 +62,8 @@ export interface GraphListItemsResponse<TFields = Record<string, unknown>> {
 export interface SPReviewFields {
   Title?: string; // used as Review ID
   ReviewID?: string;
+  Brand?: string;
+  OutletCode?: string;
   Outlet?: string;
   Reviewer?: string;
   ReviewDate?: string;

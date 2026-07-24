@@ -50,7 +50,7 @@ export default function ReviewDetailPanel({ review, editable, onClose, onSaved }
       <div className="relative w-full max-w-lg bg-surface h-full overflow-y-auto shadow-xl border-l border-border">
         <div className="sticky top-0 bg-surface border-b border-border px-5 py-4 flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs text-ink-muted">{review.outlet} · {new Date(review.reviewDate).toLocaleDateString()}</p>
+            <p className="text-xs text-ink-muted">{review.brand} · {review.outletCode || "No code"} · {review.outlet} · {new Date(review.reviewDate).toLocaleDateString()}</p>
             <h2 className="text-base font-semibold text-ink">{review.reviewer}</h2>
             <StarRating value={review.starRating} />
           </div>

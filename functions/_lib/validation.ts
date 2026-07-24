@@ -4,6 +4,7 @@
 
 import { CATEGORY_OPTIONS, SEVERITY_OPTIONS, STATUS_OPTIONS } from "../../src/types";
 import type { Review } from "../../src/types";
+import { resolveOutletIdentity } from "../../src/data/outletDirectory";
 
 export function validateReviewRow(row: Partial<Review>): string[] {
   const errors: string[] = [];
@@ -40,19 +41,8 @@ export function validateReviewRow(row: Partial<Review>): string[] {
   return errors;
 }
 
-/** Normalises common outlet-name variants to a canonical form. */
-const OUTLET_ALIASES: Record<string, string> = {
-  "the gardens": "Kintsugi @ The Gardens",
-  "kintsugi gardens": "Kintsugi @ The Gardens",
-  "one utama": "Way Modern Chinois @ One Utama",
-  "1u": "Way Modern Chinois @ One Utama",
-  "sunway velocity": "Ramen Takahashi @ Sunway Velocity",
-};
-
 export function standardiseOutletName(raw: string): string {
-  const trimmed = raw.trim();
-  const lower = trimmed.toLowerCase();
-  return OUTLET_ALIASES[lower] || trimmed;
+  return resolveOutletIdentity({ outlet: raw }).outlet;
 }
 
 /** Attempts to parse a variety of common date formats into ISO 8601. */

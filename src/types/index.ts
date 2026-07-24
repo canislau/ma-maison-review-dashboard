@@ -62,6 +62,8 @@ export type UserRole = "Viewer" | "Manager" | "Administrator";
 export interface Review {
   id: string; // stable row identifier
   reviewId: string; // Review ID (business key, e.g. MM003-2026-07-0001)
+  brand: string;
+  outletCode: string;
   outlet: string;
   reviewer: string;
   reviewDate: string; // YYYY-MM-DD
@@ -130,6 +132,8 @@ export interface ImportPreviewRow {
 
 export interface ImportPreviewResult {
   fileName: string;
+  brand: string;
+  outletCode: string;
   outlet: string;
   totalRows: number;
   validRows: number;
@@ -161,6 +165,7 @@ export interface ImportCommitResult {
 // ----------------------------------------------------------------------------
 
 export interface DashboardFilters {
+  brand?: string;
   outlet?: string; // "All" or specific outlet name
   month?: string; // "YYYY-MM"
   dateFrom?: string;
@@ -188,7 +193,8 @@ export interface ComplaintAnalysisSummary {
   highSeverityCount: number;
   criticalCount: number;
   repeatedThemes: { theme: string; count: number }[];
-  outletComparison: { outlet: string; totalReviews: number; averageRating: number; negativePercentage: number }[];
+  brandComparison: { brand: string; totalReviews: number; averageRating: number; negativePercentage: number }[];
+  outletComparison: { brand: string; outletCode: string; outlet: string; totalReviews: number; averageRating: number; negativePercentage: number }[];
 }
 
 export interface ManagementActionProgressSummary {
@@ -212,6 +218,7 @@ export interface DashboardData {
   ratingTrend: { month: string; averageRating: number }[];
   volumeTrend: { month: string; count: number }[];
   positiveNegativeTrend: { month: string; positive: number; negative: number }[];
+  brands: string[];
   outlets: string[];
 }
 
@@ -236,6 +243,7 @@ export interface PaginatedResult<T> {
 export interface ReviewListQuery {
   page?: number;
   pageSize?: number;
+  brand?: string;
   outlet?: string;
   month?: string; // YYYY-MM
   dateFrom?: string;

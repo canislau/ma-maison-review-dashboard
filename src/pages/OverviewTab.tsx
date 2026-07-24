@@ -16,6 +16,7 @@ import type { DashboardData } from "../types";
 import KpiCard from "../components/KpiCard";
 import { FilterBar, SelectFilter } from "../components/FilterBar";
 import { LoadingState, ErrorState } from "../components/States";
+import type { OutletDirectoryEntry } from "../data/outletDirectory";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend);
 
@@ -52,10 +53,13 @@ function getPresetRange(preset: Exclude<DateRangePreset, "custom">): { from: str
 }
 
 export default function OverviewTab() {
+  const [brand, setBrand] = useState("All");
   const [outlet, setOutlet] = useState("All");
   const [datePreset, setDatePreset] = useState<DateRangePreset>("this-month");
   const [dateRange, setDateRange] = useState(() => getPresetRange("this-month"));
   const [outlets, setOutlets] = useState<string[]>([]);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [directory, setDirectory] = useState<OutletDirectoryEntry[]>([]);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,17 +69,19 @@ export default function OverviewTab() {
     setError(null);
     try {
       const [dashboard, outletsRes] = await Promise.all([
-        api.dashboard.get({ outlet, dateFrom: dateRange.from, dateTo: dateRange.to }),
+        api.dashboard.get({ brand, outlet, dateFrom: dateRange.from, dateTo: dateRange.to }),
         api.outlets.list(),
       ]);
       setData(dashboard);
       setOutlets(outletsRes.outlets);
+      setBrands(outletsRes.brands);
+      setDirectory(outletsRes.directory);
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Failed to load dashboard data.");
     } finally {
       setLoading(false);
     }
-  }, [outlet, dateRange.from, dateRange.to]);
+  }, [brand, outlet, dateRange.from, dateRange.to]);
 
   const selectDatePreset = (preset: DateRangePreset) => {
     setDatePreset(preset);
@@ -106,10 +112,16 @@ export default function OverviewTab() {
     <div className="space-y-6">
       <FilterBar>
         <SelectFilter
+          label="All Brands"
+          value={brand === "All" ? "" : brand}
+          onChange={(value) => { setBrand(value || "All"); setOutlet("All"); }}
+          options={brands.map((item) => ({ value: item, label: item }))}
+        />
+        <SelectFilter
           label="All Outlets"
           value={outlet === "All" ? "" : outlet}
           onChange={(v) => setOutlet(v || "All")}
-          options={outlets.map((o) => ({ value: o, label: o }))}
+          options={(brand === "All" ? outlets : directory.filter((entry) => entry.brand === brand).map((entry) => entry.name)).map((o) => ({ value: o, label: o }))}
         />
         <select
           aria-label="Date range"
@@ -241,7 +253,9 @@ export default function OverviewTab() {
           <table>
             <thead>
               <tr>
-                <th>Outlet</th>
+                  <th>Brand</th>
+                  <th>Code</th>
+                  <th>Outlet</th>
                 <th>Reviews</th>
                 <th>Avg Rating</th>
                 <th>Negative %</th>
@@ -249,7 +263,9 @@ export default function OverviewTab() {
             </thead>
             <tbody>
               {complaints.outletComparison.map((o) => (
-                <tr key={o.outlet}>
+                <tr key={`${o.brand}-${o.outletCode}-${o.outlet}`}>
+                  <td>{o.brand}</td>
+                  <td>{o.outletCode || "—"}</td>
                   <td>{o.outlet}</td>
                   <td>{o.totalReviews}</td>
                   <td>{o.averageRating.toFixed(2)}</td>

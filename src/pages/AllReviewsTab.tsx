@@ -9,6 +9,7 @@ import Pagination from "../components/Pagination";
 import ReviewDetailPanel from "../components/ReviewDetailPanel";
 import UploadModal from "../components/UploadModal";
 import { useUserRole, canEditReviews, canImport } from "../hooks/useUserRole";
+import type { OutletDirectoryEntry } from "../data/outletDirectory";
 
 export default function AllReviewsTab() {
   const { role } = useUserRole();
@@ -16,6 +17,8 @@ export default function AllReviewsTab() {
   const uploadAllowed = canImport(role);
 
   const [outlets, setOutlets] = useState<string[]>([]);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [directory, setDirectory] = useState<OutletDirectoryEntry[]>([]);
   const [query, setQuery] = useState<ReviewListQuery>({ page: 1, pageSize: 25, sortBy: "reviewDate", sortDir: "desc" });
   const [reviews, setReviews] = useState<Review[]>([]);
   const [total, setTotal] = useState(0);
@@ -33,6 +36,8 @@ export default function AllReviewsTab() {
       setReviews(result.items);
       setTotal(result.total);
       setOutlets(outletsRes.outlets);
+      setBrands(outletsRes.brands);
+      setDirectory(outletsRes.directory);
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Failed to load reviews.");
     } finally {
@@ -94,7 +99,8 @@ export default function AllReviewsTab() {
 
       <FilterBar>
         <SearchFilter value={query.search || ""} onChange={(v) => updateQuery({ search: v })} />
-        <SelectFilter label="All Outlets" value={query.outlet || ""} onChange={(v) => updateQuery({ outlet: v })} options={outlets.map((o) => ({ value: o, label: o }))} />
+        <SelectFilter label="All Brands" value={query.brand || ""} onChange={(v) => updateQuery({ brand: v || undefined, outlet: undefined })} options={brands.map((brand) => ({ value: brand, label: brand }))} />
+        <SelectFilter label="All Outlets" value={query.outlet || ""} onChange={(v) => updateQuery({ outlet: v || undefined })} options={(query.brand ? directory.filter((entry) => entry.brand === query.brand).map((entry) => entry.name) : outlets).map((o) => ({ value: o, label: o }))} />
         <MonthPicker value={query.month || ""} onChange={(v) => updateQuery({ month: v })} />
         <SelectFilter
           label="All Ratings"
@@ -119,6 +125,8 @@ export default function AllReviewsTab() {
             <thead>
               <tr>
                 <th>Reviewer</th>
+                <th>Brand</th>
+                <th>Code</th>
                 <th>Outlet</th>
                 <th className="cursor-pointer select-none" onClick={() => handleSort("reviewDate")}>
                   Date {query.sortBy === "reviewDate" && (query.sortDir === "asc" ? "↑" : "↓")}
@@ -136,6 +144,8 @@ export default function AllReviewsTab() {
               {reviews.map((r) => (
                 <tr key={r.id} className="hover:bg-section cursor-pointer" onClick={() => setSelected(r)}>
                   <td className="font-medium">{r.reviewer}</td>
+                  <td>{r.brand}</td>
+                  <td className="font-medium whitespace-nowrap">{r.outletCode || "—"}</td>
                   <td>{r.outlet}</td>
                   <td className="whitespace-nowrap">{new Date(r.reviewDate).toLocaleDateString()}</td>
                   <td><StarRating value={r.starRating} /></td>
@@ -174,7 +184,7 @@ export default function AllReviewsTab() {
 
       {showUpload && (
         <UploadModal
-          outlets={outlets}
+          directory={directory}
           onClose={() => setShowUpload(false)}
           onImported={() => {
             load();

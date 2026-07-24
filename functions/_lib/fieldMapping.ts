@@ -14,6 +14,7 @@
 
 import type { Review, ActionTrackerItem, Category, Severity, ReviewStatus } from "../../src/types";
 import type { GraphListItem, SPReviewFields, SPActionTrackerFields } from "./types";
+import { resolveOutletIdentity } from "../../src/data/outletDirectory";
 function normaliseStoredReviewDate(value: unknown): string {
   const raw = String(value ?? "").trim();
   if (!raw) return "";
@@ -58,10 +59,18 @@ function mapStoredStatus(value?: string): ReviewStatus {
 
 export function spItemToReview(item: GraphListItem<SPReviewFields>): Review {
   const f = item.fields;
+  const identity = resolveOutletIdentity({
+    brand: f.Brand,
+    outletCode: f.OutletCode,
+    outlet: f.Outlet,
+    reviewId: f.ReviewID || f.Title,
+  });
   return {
     id: item.id,
     reviewId: f.ReviewID || f.Title || item.id,
-    outlet: f.Outlet || "",
+    brand: identity.brand,
+    outletCode: identity.outletCode,
+    outlet: identity.outlet,
     reviewer: f.Reviewer || "",
     reviewDate: normaliseStoredReviewDate(f.ReviewDate),
     starRating: (Number(f.StarRating) || 5) as Review["starRating"],
@@ -91,6 +100,8 @@ export function reviewToSpFields(review: Partial<Review>): Partial<SPReviewField
     f.Title = review.reviewId;
     f.ReviewID = review.reviewId;
   }
+  if (review.brand !== undefined) f.Brand = review.brand;
+  if (review.outletCode !== undefined) f.OutletCode = review.outletCode;
   if (review.outlet !== undefined) f.Outlet = review.outlet;
   if (review.reviewer !== undefined) f.Reviewer = review.reviewer;
   if (review.reviewDate !== undefined) f.ReviewDate = review.reviewDate.slice(0, 10);

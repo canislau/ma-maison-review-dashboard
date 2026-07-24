@@ -15,6 +15,7 @@ import type {
   ImportCommitResult,
   ApiError,
 } from "../types";
+import type { OutletDirectoryEntry } from "../data/outletDirectory";
 
 export class ApiClientError extends Error {
   status: number;
@@ -79,10 +80,12 @@ export const api = {
     update: (id: string, fields: Partial<EditableReviewFields>) =>
       request<Review>(`/reviews/${id}`, { method: "PUT", body: JSON.stringify(fields) }),
     delete: (id: string) => request<{ success: boolean }>(`/reviews/${id}`, { method: "DELETE" }),
-    importPreview: (file: File, outlet: string) => {
+    importPreview: (file: File, identity: { brand: string; outletCode: string; outlet: string }) => {
       const form = new FormData();
       form.append("file", file);
-      form.append("outlet", outlet);
+      form.append("brand", identity.brand);
+      form.append("outletCode", identity.outletCode);
+      form.append("outlet", identity.outlet);
       return request<ImportPreviewResult>("/reviews/import", { method: "POST", body: form });
     },
     importCommit: (body: ImportCommitRequest) =>
@@ -92,7 +95,7 @@ export const api = {
       }),
   },
   dashboard: {
-    get: (filters: { outlet?: string; month?: string; dateFrom?: string; dateTo?: string } = {}) =>
+    get: (filters: { brand?: string; outlet?: string; month?: string; dateFrom?: string; dateTo?: string } = {}) =>
       request<DashboardData>(`/dashboard${toQueryString(filters)}`),
   },
   monthlySummary: {
@@ -100,7 +103,7 @@ export const api = {
       request(`/monthly-summary${toQueryString({ month, outlet })}`),
   },
   outlets: {
-    list: () => request<{ outlets: string[] }>("/outlets"),
+    list: () => request<{ brands: string[]; outlets: string[]; directory: OutletDirectoryEntry[] }>("/outlets"),
   },
   categories: {
     list: () => request<{ categories: string[]; severities: string[]; statuses: string[] }>("/categories"),
@@ -137,7 +140,7 @@ export async function downloadExport(
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `ma-maison-reviews.${format}`;
+  a.download = `cwx-reviews.${format}`;
   document.body.appendChild(a);
   a.click();
   a.remove();

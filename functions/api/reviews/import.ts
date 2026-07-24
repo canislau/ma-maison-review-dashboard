@@ -30,12 +30,15 @@ import type {
   ImportCommitRequest,
   ImportCommitResult,
 } from "../../../src/types";
+import { resolveOutletIdentity } from "../../../src/data/outletDirectory";
 
 const STAGE_TTL_SECONDS = 60 * 30; // staged imports expire after 30 minutes
 
 interface StagedImport {
   fileName: string;
   fileType: "csv" | "json" | "xlsx";
+  brand: string;
+  outletCode: string;
   outlet: string;
   contentBase64: string;
   contentType: string;
@@ -187,6 +190,8 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
 
   const file = formData.get("file");
   const outletHint = String(formData.get("outlet") || "");
+  const brandHint = String(formData.get("brand") || "");
+  const outletCodeHint = String(formData.get("outletCode") || "");
 
   if (!(file instanceof File)) {
     throw new ApiException(400, "NO_FILE", "No file was uploaded.");
@@ -205,6 +210,12 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
   let parsedRows: Partial<Review>[];
   try {
     parsedRows = parseUploadedFile(fileType, file.name, buffer, outletHint);
+    parsedRows = parsedRows.map((row) => ({ ...row, ...resolveOutletIdentity({
+      brand: row.brand || brandHint,
+      outletCode: row.outletCode || outletCodeHint,
+      outlet: row.outlet || outletHint,
+      reviewId: row.reviewId,
+    }) }));
   } catch (err) {
     throw new ApiException(400, "PARSE_ERROR", err instanceof Error ? err.message : "Failed to parse file.");
   }
@@ -230,10 +241,13 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
     };
   });
 
+  const stagedIdentity = resolveOutletIdentity({ brand: brandHint, outletCode: outletCodeHint, outlet: outletHint });
   const staged: StagedImport = {
     fileName: file.name,
     fileType,
-    outlet: outletHint || parsedRows[0]?.outlet || "Unspecified",
+    brand: stagedIdentity.brand,
+    outletCode: stagedIdentity.outletCode,
+    outlet: stagedIdentity.outlet || parsedRows[0]?.outlet || "Unspecified",
     contentBase64: arrayBufferToBase64(buffer),
     contentType: file.type || "application/octet-stream",
     rows: parsedRows,
@@ -243,6 +257,8 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
 
   const result: ImportPreviewResult = {
     fileName: file.name,
+    brand: staged.brand,
+    outletCode: staged.outletCode,
     outlet: staged.outlet,
     totalRows: rows.length,
     validRows: rows.filter((r) => r.errors.length === 0).length,

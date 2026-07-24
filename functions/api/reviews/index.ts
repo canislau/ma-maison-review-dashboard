@@ -20,6 +20,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
   });
   let reviews: Review[] = items.map(spItemToReview);
 
+  const brand = q.get("brand");
   const outlet = q.get("outlet");
   const month = q.get("month");
   const dateFrom = q.get("dateFrom");
@@ -33,6 +34,7 @@ export const onRequest = withAuth(async ({ request, env }) => {
   const concernOnly = q.get("concernOnly") === "true";
   const overdueOnly = q.get("overdueOnly") === "true";
 
+  if (brand && brand !== "All") reviews = reviews.filter((r) => r.brand === brand);
   if (outlet && outlet !== "All") reviews = reviews.filter((r) => r.outlet === outlet);
   if (month) reviews = reviews.filter((r) => r.reviewDate?.slice(0, 7) === month);
   if (dateFrom) reviews = reviews.filter((r) => new Date(r.reviewDate) >= new Date(dateFrom));
@@ -49,6 +51,9 @@ export const onRequest = withAuth(async ({ request, env }) => {
     reviews = reviews.filter(
       (r) =>
         r.reviewer.toLowerCase().includes(search) ||
+        r.brand.toLowerCase().includes(search) ||
+        r.outletCode.toLowerCase().includes(search) ||
+        r.outlet.toLowerCase().includes(search) ||
         r.originalReview.toLowerCase().includes(search) ||
         r.englishTranslation.toLowerCase().includes(search) ||
         r.reviewId.toLowerCase().includes(search)

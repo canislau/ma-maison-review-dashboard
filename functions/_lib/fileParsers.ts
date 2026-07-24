@@ -9,12 +9,17 @@
 import * as XLSX from "xlsx";
 import type { Review } from "../../src/types";
 import { standardiseOutletName, standardiseReviewDate } from "./validation";
+import { resolveOutletIdentity } from "../../src/data/outletDirectory";
 
 // Maps flexible/lowercased header variants to our canonical Review keys.
 const HEADER_ALIASES: Record<string, keyof Review> = {
   reviewid: "reviewId",
   "review id": "reviewId",
   outlet: "outlet",
+  brand: "brand",
+  outletcode: "outletCode",
+  "outlet code": "outletCode",
+  code: "outletCode",
   branch: "outlet",
   store: "outlet",
   reviewer: "reviewer",
@@ -122,6 +127,10 @@ function mapRowToReview(rawRow: Record<string, unknown>, outletHint?: string): P
   if (!row.outlet && outletHint) {
     row.outlet = standardiseOutletName(outletHint);
   }
+  const identity = resolveOutletIdentity(row);
+  row.brand = identity.brand;
+  row.outletCode = identity.outletCode;
+  row.outlet = identity.outlet;
 
   return row;
 }
