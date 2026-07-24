@@ -211,8 +211,11 @@ export const onRequest = withAuth(async ({ request, env, user }) => {
   try {
     parsedRows = parseUploadedFile(fileType, file.name, buffer, outletHint);
     parsedRows = parsedRows.map((row) => ({ ...row, ...resolveOutletIdentity({
-      brand: row.brand || brandHint,
-      outletCode: row.outletCode || outletCodeHint,
+      // The outlet selected in the upload form is an explicit management
+      // choice and must win over an ambiguous name inferred from the file
+      // (for example, both MM012 and RT001 are "Sunway Velocity").
+      brand: brandHint || row.brand,
+      outletCode: outletCodeHint || row.outletCode,
       outlet: row.outlet || outletHint,
       reviewId: row.reviewId,
     }) }));
